@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  db:
+    image: ankane/pgvector:latest
+    container_name: govt_navigator_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-govt_navigator}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - govt_navigator_net
+
+  backend:
+    build: 
+      context: ./backend
+    container_name: govt_navigator_backend
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-govt_navigator}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL}
+      - OLLAMA_INTERPRETER_MODEL=${OLLAMA_INTERPRETER_MODEL}
+      - OLLAMA_ANALYZER_MODEL=${OLLAMA_ANALYZER_MODEL}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    networks:
+      - govt_navigator_net
+    restart: unless-stopped
+
+  frontend:
+    build: 
+      context: ./frontend
+    container_name: govt_navigator_frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - govt_navigator_net
+    restart: unless-stopped
+
+networks:
+  govt_navigator_net:
+    driver: bridge
+
+volumes:
+  postgres_data:
