@@ -1,54 +1,99 @@
 import React from 'react';
-import { Layers, FileText, AlertCircle } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, ArrowRight } from 'lucide-react';
 
 export default function DependencyGraph({ scheme }) {
   if (!scheme.docs) return null;
 
+  // Flatten the documents into a linear path
+  const roadmapSteps = [
+    { title: "Foundational Identity", docs: scheme.docs.foundational, time: "1-3 Days" },
+    { title: "Scheme Specific Proofs", docs: scheme.docs.contextual, time: "5-10 Days" },
+    { title: "Final Compliance & Formatting", docs: scheme.docs.instructional, time: "1 Day" }
+  ];
+
   return (
-    <div className="glass-panel" style={{maxWidth: '800px', margin: '0 auto'}}>
-      <h2 style={{marginBottom: '0.5rem'}}>{scheme.name}</h2>
-      <p style={{color: 'var(--text-secondary)', marginBottom: '2rem'}}>Document Dependency Checklist</p>
-
-      <div className="checklist-group">
-        <h4><Layers size={20}/> Foundational Documents</h4>
-        <p style={{fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem'}}>Standard identity proofs required across all portals.</p>
-        {scheme.docs.foundational.map(doc => (
-          <div className="checklist-item" key={doc.id}>
-            <input type="checkbox" className="checkbox" />
-            <div>
-              <p style={{fontWeight: '500'}}>{doc.name}</p>
-            </div>
-          </div>
-        ))}
+    <div className="glass-panel" style={{maxWidth: '800px', margin: '0 auto', padding: '3rem'}}>
+      <div style={{textAlign: 'center', marginBottom: '3rem'}}>
+        <h2 style={{fontSize: '2rem', marginBottom: '0.5rem'}}>{scheme.name}</h2>
+        <p style={{color: 'var(--accent-primary)', fontWeight: 600}}>Your Actionable Application Roadmap</p>
       </div>
 
-      <div className="checklist-group">
-        <h4><FileText size={20}/> Contextual Documents</h4>
-        <p style={{fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem'}}>Specific proofs required for this particular scheme.</p>
-        {scheme.docs.contextual.map(doc => (
-          <div className="checklist-item" key={doc.id}>
-            <input type="checkbox" className="checkbox" />
-            <div>
-              <p style={{fontWeight: '500'}}>{doc.name}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+      <div style={{position: 'relative'}}>
+        {/* The vertical line */}
+        <div style={{
+          position: 'absolute', 
+          left: '1.5rem', 
+          top: '0', 
+          bottom: '0', 
+          width: '2px', 
+          background: 'linear-gradient(to bottom, var(--accent-primary), transparent)',
+          zIndex: 0
+        }} />
 
-      <div className="checklist-group">
-        <h4><AlertCircle size={20}/> Instructional / Actionable</h4>
-        <p style={{fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem'}}>Specific formatting rules defined by the gazette.</p>
-        {scheme.docs.instructional.map(doc => (
-          <div className="checklist-item" key={doc.id}>
-            <input type="checkbox" className="checkbox" />
-            <div>
-              <p style={{fontWeight: '500'}}>{doc.name}</p>
+        {roadmapSteps.map((step, idx) => (
+          <div key={idx} style={{position: 'relative', paddingLeft: '4rem', marginBottom: '3rem', zIndex: 1}}>
+            <div style={{
+              position: 'absolute', 
+              left: '0', 
+              top: '0', 
+              width: '3rem', 
+              height: '3rem', 
+              background: 'var(--bg-gradient)', 
+              borderRadius: '50%', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              border: '2px solid var(--accent-primary)',
+              boxShadow: '0 0 15px rgba(59, 130, 246, 0.4)'
+            }}>
+              <span style={{fontWeight: 700}}>{idx + 1}</span>
+            </div>
+
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem'}}>
+              <h3 style={{fontSize: '1.3rem'}}>{step.title}</h3>
+              <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem'}}>
+                <Clock size={14}/>
+                <span>Est: {step.time}</span>
+              </div>
+            </div>
+
+            <div style={{display: 'grid', gap: '0.75rem'}}>
+              {step.docs.map(doc => (
+                <div key={doc.id} style={{
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '1rem', 
+                  padding: '1rem', 
+                  background: 'rgba(255,255,255,0.03)', 
+                  borderRadius: '12px',
+                  border: '1px solid rgba(255,255,255,0.05)'
+                }}>
+                  <Circle size={18} color="var(--text-secondary)" />
+                  <span style={{color: '#e2e8f0', fontSize: '0.95rem'}}>{doc.name}</span>
+                  {doc.mandatory && <span style={{fontSize: '0.65rem', color: 'var(--danger)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700}}>Required</span>}
+                </div>
+              ))}
             </div>
           </div>
         ))}
       </div>
       
-      <button className="btn-primary" style={{marginTop: '1rem'}}>Mark as Ready & Continue to Govt Portal</button>
+      <div style={{textAlign: 'center', marginTop: '4rem'}}>
+        <button className="btn-primary" style={{
+          padding: '1.2rem 3rem', 
+          fontSize: '1.1rem', 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '0.75rem', 
+          margin: '0 auto',
+          boxShadow: '0 10px 30px rgba(59, 130, 246, 0.3)'
+        }}>
+          Begin Guided Application <ArrowRight size={20}/>
+        </button>
+        <p style={{marginTop: '1rem', fontSize: '0.85rem', color: 'var(--text-secondary)'}}>
+          We will redirect you to the official {scheme.department} portal.
+        </p>
+      </div>
     </div>
   );
 }

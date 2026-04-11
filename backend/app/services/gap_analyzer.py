@@ -10,28 +10,40 @@ logger = logging.getLogger(__name__)
 
 class GapAnalysisResponse(BaseModel):
     status: str
+    fit_score: int  # 0 to 100
     hard_blockers: List[str]
     fixable_gaps: List[str]
     summary_message: str
+    success_strategy: str
 
 SYSTEM_PROMPT = """
-You are the empathetic, solution-oriented Citizen Success Guide for GovtNavigator. 
-The backend Rule Engine has evaluated a Citizen's Profile against a Government Scheme and determined they are INELIGIBLE. 
+You are the empathetic, expert Citizen Success Guide for GovtNavigator. 
+Your goal is to provide a "Strategic Path to Approval" rather than just a rejection.
 
 ## YOUR TASK:
-Translate the deterministic JSON-Logic failures into actionable, clear English. 
+Translate deterministic JSON-Logic failures into a prescriptive, high-quality strategy.
 
 ## OPERATIONAL GUIDELINES:
-1. BE DIRECT BUT HELPFUL: Do not just list failures. Explain them clearly.
-2. IDENTIFY THE GAPS: Point out easily fixable gaps vs. hard blockers. Age is a hard blocker. Missing a certification is a fixable gap.
-3. SUGGEST PIVOTS: If possible, use the context to suggest an alternative.
+1. CALCULATE FIT SCORE: 
+   - 100: Eligible.
+   - 70-90: Fixable (missing documents, small project cost adjustments).
+   - <50: Hard Blockers (Age, State, basic eligibility).
+2. DISTINGUISH GAPS:
+   - Hard Blockers: Non-negotiable (e.g., Age > 40).
+   - Fixable Gaps: Actionable (e.g., "Need to register enterprise", "Missing high school cert").
+3. BE PRESCRIPTIVE: Instead of "You failed X," say "To qualify, you need to accomplish Y."
+4. THE PIVOT: If a hard blocker is found, suggest a related government scheme (e.g., "Try PMEGP instead of MYSY").
 
 ## OUTPUT FORMAT:
-Return a JSON object STRICTLY matching the expected format:
-"status": "Ineligible",
-"hard_blockers": ["List of non-fixable issues"],
-"fixable_gaps": ["List of actionable steps"],
-"summary_message": "Friendly explanation."
+Return a JSON object:
+{
+  "status": "Ineligible" | "Eligible",
+  "fit_score": integer,
+  "hard_blockers": [],
+  "fixable_gaps": [],
+  "summary_message": "Warm, encouraging summary.",
+  "success_strategy": "Actionable 1-2 sentence strategy."
+}
 """
 
 class GapAnalyzer:
@@ -66,6 +78,8 @@ class GapAnalyzer:
         Citizen Profile: {json.dumps(profile)}
         Scheme Name: {scheme_name}
         Failed Logical Constraints: {failed_rules}
+        
+        Analyze the gaps and provide a strategic fit score and success strategy.
         """
 
         try:
@@ -83,4 +97,12 @@ class GapAnalyzer:
             return GapAnalysisResponse(**parsed_data)
         except Exception as e:
             logger.error(f"Failed to generate explanation or parse response: {e}")
-            raise e
+            # Fallback if AI fails
+            return GapAnalysisResponse(
+                status="Ineligible",
+                fit_score=50,
+                hard_blockers=["Technical error in analysis"],
+                fixable_gaps=[],
+                summary_message="We encountered an issue analyzing your specific profile. Please review the official guidelines.",
+                success_strategy="Consult the official ministry website for detailed eligibility."
+            )

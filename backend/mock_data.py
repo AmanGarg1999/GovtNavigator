@@ -27,7 +27,7 @@ MOCK_USERS = [
         enterprise_type="Manufacturing",
         project_cost=2000000,
         is_defaulter=False
-    ), # 0. Ideal Applicant
+    ), # 0. Ideal Applicant (UP Manufacturing)
     CitizenProfile(
         age=45,
         domicile_state="Uttar Pradesh",
@@ -42,10 +42,20 @@ MOCK_USERS = [
         age=28,
         domicile_state="Delhi",
         education_level="Bachelors",
-        income_annual=300000,
+        income_annual=500000,
         gender="Male",
-        enterprise_type="Retail",
+        enterprise_type="IT & ITES",
+        project_cost=1000000,
+        is_defaulter=False
+    ), # 2. Delhi IT Applicant
+    CitizenProfile(
+        age=32,
+        domicile_state="Maharashtra",
+        education_level="Masters",
+        income_annual=800000,
+        gender="Female",
+        enterprise_type="Agriculture",
         project_cost=500000,
-        is_defaulter=True
-    ) # 2. Multiple hard block + fixable (State, Retail, Defaulter)
+        is_defaulter=False
+    ) # 3. Maharashtra Agri Applicant
 ]
