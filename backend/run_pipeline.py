@@ -17,10 +17,6 @@ def run_automation_pipeline():
     print("GOVTNAVIGATOR: AUTONOMOUS DATA PIPELINE INITIATED")
     print("==================================================\n")
     
-    if not os.getenv("GEMINI_API_KEY"):
-        print("ERROR: GEMINI_API_KEY is missing from .env.")
-        return
-
     target_url = "https://diupmsme.upsdc.gov.in/notices/mysy_2024.html"
 
     # Stage 1: Crwaler
@@ -46,10 +42,22 @@ def run_automation_pipeline():
         print("\n==================================================")
         print("PIPELINE SUCCESS: FINAL UNIFIED SCHEME SCHEMA")
         print("==================================================")
-        print(json_schema.model_dump_json(indent=2))
+        # print(json_schema.model_dump_json(indent=2))
         
-        # Stage 4: Database Storage (Simulated)
-        print("\n[STAGE 4] Saving Unified Schema to PostgreSQL Dashboard... [SUCCESS]")
+        # Stage 4: Database Storage (Real)
+        print("\n[STAGE 4] Saving Unified Schema to PostgreSQL Dashboard...")
+        import httpx
+        try:
+            # We call our own API to save the data
+            response = httpx.post("http://localhost:8000/api/v1/schemes/ingest", 
+                                json=json_schema.model_dump(), 
+                                timeout=10.0)
+            response.raise_for_status()
+            print("PIPELINE STORAGE SUCCESSFUL: Scheme registered in database.")
+        except Exception as db_err:
+            print(f"PIPELINE STORAGE FAILED: {db_err}")
+            # Fallback: Print it anyway
+            print(json_schema.model_dump_json(indent=2))
         
     except Exception as e:
         print(f"PIPELINE CRASHED: {e}")

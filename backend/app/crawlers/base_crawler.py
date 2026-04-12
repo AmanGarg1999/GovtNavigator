@@ -12,37 +12,40 @@ class UnifiedWebCrawler:
 
     def fetch_notice(self, url: str) -> Optional[str]:
         """
-        Fetches a text notice from a target URL.
-        Note: For Sprint 4 MBP testing, we mock the scraping via a dummy payload 
-        to avoid live HTTP requests hanging on slow regional sites.
+        Fetches a text notice from a target URL using real HTTP requests.
+        Optimized for slow government portals with appropriate headers and timeouts.
         """
         logger.info(f"Crawling URL: {url}")
         
-        # MOCKED HTML RESPONSE FOR SPRINT 4 (Simulating a Hindi UP Gazette Notification)
-        mock_html = """
-        <html>
-            <body>
-                <div class="notification-body">
-                    <h2>सूचना: मुख्यमंत्री युवा स्वरोजगार योजना 2024</h2>
-                    <p>योजना का उद्देश्य उत्तर प्रदेश के शिक्षित बेरोजगार युवाओं को स्वरोजगार के अवसर प्रदान करना है।</p>
-                    <p>पात्रता मानदंड:</p>
-                    <ul>
-                        <li>आवेदक उत्तर प्रदेश का मूल निवासी होना चाहिए।</li>
-                        <li>आवेदक की आयु 18 से 40 वर्ष के बीच होनी चाहिए।</li>
-                        <li>न्यूनतम शैक्षिक योग्यता हाई स्कूल उत्तीर्ण होनी चाहिए।</li>
-                        <li>किसी भी बैंक का डिफॉल्टर नहीं होना चाहिए।</li>
-                    </ul>
-                    <p>लाभ: परियोजना लागत का 25% मार्जिन मनी सब्सिडी। उद्योग के लिए अधिकतम 25 लाख और सेवा क्षेत्र के लिए 10 लाख।</p>
-                </div>
-            </body>
-        </html>
-        """
-        
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+        }
+
         try:
-            soup = BeautifulSoup(mock_html, 'html.parser')
-            # Extract main text
-            notice_text = soup.find('div', class_='notification-body').get_text(separator="\n", strip=True)
+            response = self.client.get(url, headers=headers, follow_redirects=True)
+            response.raise_for_status()
+            
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            # Clean up unwanted elements
+            for script in soup(["script", "style"]):
+                script.decompose()
+
+            # Attempt to find the main content body (Govt sites vary widely)
+            content = soup.find('div', class_='content') or soup.find('article') or soup.find('body')
+            
+            if not content:
+                logger.warning(f"No clear content found at {url}")
+                return None
+
+            notice_text = content.get_text(separator="\n", strip=True)
             return notice_text
+            
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error occurred while crawling {url}: {e}")
+            return None
         except Exception as e:
-            logger.error(f"Failed to crawl {url}: {e}")
+            logger.error(f"Unexpected error while crawling {url}: {e}")
             return None

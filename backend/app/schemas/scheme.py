@@ -1,5 +1,7 @@
 from typing import List, Optional, Union, Dict, Any
 from pydantic import BaseModel, Field
+from sqlmodel import SQLModel, Field as SQLField, Column, JSON
+from sqlalchemy.dialects.postgresql import JSONB
 
 class BasicDetails(BaseModel):
     title_english: str = Field(..., description="English title of the scheme")
@@ -66,3 +68,16 @@ class UnifiedSchemeSchema(BaseModel):
     benefits: Benefits
     document_dependency_graph: FullDependencyGraph
     application_process: ApplicationProcess
+
+class Scheme(SQLModel, table=True):
+    __tablename__ = "schemes"
+    
+    id: Optional[int] = SQLField(default=None, primary_key=True)
+    scheme_id: str = SQLField(index=True, unique=True)
+    name: str = SQLField(index=True)
+    state: str = SQLField(index=True)
+    department: str = SQLField(index=True)
+    is_verified: bool = SQLField(default=False)
+    
+    # Store the entire UnifiedSchemeSchema as a JSONB blob
+    data: Dict[str, Any] = SQLField(default_factory=dict, sa_column=Column(JSONB))

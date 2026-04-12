@@ -25,6 +25,8 @@ services:
       - OLLAMA_ANALYZER_MODEL=${OLLAMA_ANALYZER_MODEL}
     ports:
       - "8000:8000"
+    volumes:
+      - ./backend:/app
     depends_on:
       - db
     networks:
@@ -37,6 +39,9 @@ services:
     container_name: govt_navigator_frontend
     ports:
       - "8080:80"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     depends_on:
       - backend
     networks:

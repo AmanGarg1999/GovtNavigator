@@ -130,18 +130,42 @@ export default function SchemeList({ schemes, onSelect }) {
                   )}
                 </div>
 
-                <button 
-                  className="btn-primary" 
-                  style={{
-                    background: scheme.status === 'Eligible' ? 'var(--accent-primary)' : 'rgba(255,255,255,0.05)', 
-                    color: scheme.status === 'Eligible' ? '#fff' : 'var(--text-secondary)',
-                    border: scheme.status === 'Eligible' ? 'none' : '1px solid var(--card-border)'
-                  }}
-                  onClick={() => onSelect(scheme)}
-                  disabled={scheme.status !== 'Eligible'}
-                >
-                  {scheme.status === 'Eligible' ? 'Check Documents' : 'Not Eligible'}
-                </button>
+                <div style={{display: 'flex', gap: '0.5rem', marginTop: 'auto'}}>
+                  <button 
+                    className="btn-primary" 
+                    style={{
+                      flex: 1,
+                      background: scheme.status === 'Eligible' ? 'var(--accent-primary)' : 'rgba(255,255,255,0.05)', 
+                      color: scheme.status === 'Eligible' ? '#fff' : 'var(--text-secondary)',
+                      border: scheme.status === 'Eligible' ? 'none' : '1px solid var(--card-border)'
+                    }}
+                    onClick={() => onSelect(scheme)}
+                    disabled={scheme.status !== 'Eligible'}
+                  >
+                    {scheme.status === 'Eligible' ? 'Check Documents' : 'Not Eligible'}
+                  </button>
+                  {scheme.sourceUrl && (
+                    <a 
+                      href={scheme.sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-secondary"
+                      style={{
+                        padding: '0 1rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '1px solid var(--card-border)',
+                        borderRadius: '8px',
+                        color: 'var(--text-secondary)'
+                      }}
+                      title="Visit Official Portal"
+                    >
+                      <Compass size={18} />
+                    </a>
+                  )}
+                </div>
               </div>
             ))}
           </div>

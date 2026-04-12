@@ -1,8 +1,26 @@
-import React from 'react';
-import { CheckCircle2, Circle, Clock, ArrowRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { CheckCircle2, Circle, Clock, ArrowRight, ExternalLink } from 'lucide-react';
 
 export default function DependencyGraph({ scheme }) {
+  const [checkedDocs, setCheckedDocs] = useState({});
+
   if (!scheme.docs) return null;
+
+  const toggleDoc = (id) => {
+    setCheckedDocs(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
+  const allDocs = [
+    ...scheme.docs.foundational,
+    ...scheme.docs.contextual,
+    ...scheme.docs.instructional
+  ];
+  
+  const completedCount = allDocs.filter(d => checkedDocs[d.id]).length;
+  const progressPercent = Math.round((completedCount / allDocs.length) * 100);
 
   // Flatten the documents into a linear path
   const roadmapSteps = [
@@ -16,6 +34,22 @@ export default function DependencyGraph({ scheme }) {
       <div style={{textAlign: 'center', marginBottom: '3rem'}}>
         <h2 style={{fontSize: '2rem', marginBottom: '0.5rem'}}>{scheme.name}</h2>
         <p style={{color: 'var(--accent-primary)', fontWeight: 600}}>Your Actionable Application Roadmap</p>
+        
+        <div style={{marginTop: '2rem', maxWidth: '400px', margin: '2rem auto 0'}}>
+          <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem'}}>
+            <span style={{color: 'var(--text-secondary)'}}>Application Readiness</span>
+            <span style={{color: 'var(--accent-primary)', fontWeight: 700}}>{progressPercent}%</span>
+          </div>
+          <div style={{height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '3px', overflow: 'hidden'}}>
+            <div style={{
+              height: '100%', 
+              width: `${progressPercent}%`, 
+              background: 'var(--accent-primary)', 
+              boxShadow: '0 0 10px var(--accent-primary)',
+              transition: 'width 0.4s ease'
+            }} />
+          </div>
+        </div>
       </div>
 
       <div style={{position: 'relative'}}>
@@ -59,18 +93,38 @@ export default function DependencyGraph({ scheme }) {
 
             <div style={{display: 'grid', gap: '0.75rem'}}>
               {step.docs.map(doc => (
-                <div key={doc.id} style={{
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '1rem', 
-                  padding: '1rem', 
-                  background: 'rgba(255,255,255,0.03)', 
-                  borderRadius: '12px',
-                  border: '1px solid rgba(255,255,255,0.05)'
-                }}>
-                  <Circle size={18} color="var(--text-secondary)" />
-                  <span style={{color: '#e2e8f0', fontSize: '0.95rem'}}>{doc.name}</span>
-                  {doc.mandatory && <span style={{fontSize: '0.65rem', color: 'var(--danger)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700}}>Required</span>}
+                <div 
+                  key={doc.id} 
+                  onClick={() => toggleDoc(doc.id)}
+                  style={{
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '1rem', 
+                    padding: '1rem', 
+                    background: checkedDocs[doc.id] ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255,255,255,0.03)', 
+                    borderRadius: '12px',
+                    border: '1px solid',
+                    borderColor: checkedDocs[doc.id] ? 'var(--accent-primary)' : 'rgba(255,255,255,0.05)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  {checkedDocs[doc.id] ? (
+                    <CheckCircle2 size={18} color="var(--accent-primary)" />
+                  ) : (
+                    <Circle size={18} color="var(--text-secondary)" />
+                  )}
+                  <span style={{
+                    color: checkedDocs[doc.id] ? '#fff' : '#e2e8f0', 
+                    fontSize: '0.95rem',
+                    textDecoration: checkedDocs[doc.id] ? 'line-through' : 'none',
+                    opacity: checkedDocs[doc.id] ? 0.6 : 1
+                  }}>
+                    {doc.name}
+                  </span>
+                  {doc.mandatory && !checkedDocs[doc.id] && (
+                    <span style={{fontSize: '0.65rem', color: 'var(--danger)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700}}>Required</span>
+                  )}
                 </div>
               ))}
             </div>
@@ -79,17 +133,24 @@ export default function DependencyGraph({ scheme }) {
       </div>
       
       <div style={{textAlign: 'center', marginTop: '4rem'}}>
-        <button className="btn-primary" style={{
-          padding: '1.2rem 3rem', 
-          fontSize: '1.1rem', 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '0.75rem', 
-          margin: '0 auto',
-          boxShadow: '0 10px 30px rgba(59, 130, 246, 0.3)'
-        }}>
+        <a 
+          href={scheme.sourceUrl} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="btn-primary" 
+          style={{
+            padding: '1.2rem 3rem', 
+            fontSize: '1.1rem', 
+            display: 'inline-flex', 
+            alignItems: 'center', 
+            gap: '0.75rem', 
+            margin: '0 auto',
+            boxShadow: '0 10px 30px rgba(59, 130, 246, 0.3)',
+            textDecoration: 'none'
+          }}
+        >
           Begin Guided Application <ArrowRight size={20}/>
-        </button>
+        </a>
         <p style={{marginTop: '1rem', fontSize: '0.85rem', color: 'var(--text-secondary)'}}>
           We will redirect you to the official {scheme.department} portal.
         </p>
