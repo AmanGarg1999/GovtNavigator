@@ -10,9 +10,10 @@ export default function SchemeList({ schemes, onSelect }) {
   const filteredSchemes = useMemo(() => {
     return schemes.filter(scheme => {
       const matchState = stateFilter === 'All' || scheme.state === stateFilter || (stateFilter === 'Central' && scheme.state === 'Central');
-      const matchSector = sectorFilter === 'All' || scheme.sector === sectorFilter;
+      const matchSector = sectorFilter === 'All' || scheme.sector === sectorFilter || (scheme.tags && scheme.tags.includes(sectorFilter));
       const matchSearch = scheme.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          scheme.department.toLowerCase().includes(searchQuery.toLowerCase());
+                          scheme.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (scheme.tags && scheme.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase())));
       return matchState && matchSector && matchSearch;
     });
   }, [schemes, stateFilter, sectorFilter, searchQuery]);

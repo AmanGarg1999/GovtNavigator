@@ -1,15 +1,21 @@
-import React, { useState } from 'react';
-import { CheckCircle2, Circle, Clock, ArrowRight, ExternalLink } from 'lucide-react';
+import React from 'react';
+import { CheckCircle2, Circle, Clock, ArrowRight } from 'lucide-react';
+import { useStorage } from '../hooks/useStorage';
 
 export default function DependencyGraph({ scheme }) {
-  const [checkedDocs, setCheckedDocs] = useState({});
+  const [allCheckedDocs, setAllCheckedDocs] = useStorage('gn_checked_docs', {});
 
   if (!scheme.docs) return null;
 
-  const toggleDoc = (id) => {
-    setCheckedDocs(prev => ({
+  const checkedDocs = allCheckedDocs[scheme.id] || {};
+
+  const toggleDoc = (docId) => {
+    setAllCheckedDocs(prev => ({
       ...prev,
-      [id]: !prev[id]
+      [scheme.id]: {
+        ...(prev[scheme.id] || {}),
+        [docId]: !(prev[scheme.id]?.[docId])
+      }
     }));
   };
 
@@ -19,7 +25,7 @@ export default function DependencyGraph({ scheme }) {
     ...scheme.docs.instructional
   ];
   
-  const completedCount = allDocs.filter(d => checkedDocs[d.id]).length;
+  const completedCount = allDocs.filter(d => checkedDocs[d.doc_id]).length;
   const progressPercent = Math.round((completedCount / allDocs.length) * 100);
 
   // Flatten the documents into a linear path
@@ -94,17 +100,17 @@ export default function DependencyGraph({ scheme }) {
             <div style={{display: 'grid', gap: '0.75rem'}}>
               {step.docs.map(doc => (
                 <div 
-                  key={doc.id} 
-                  onClick={() => toggleDoc(doc.id)}
+                  key={doc.doc_id} 
+                  onClick={() => toggleDoc(doc.doc_id)}
                   style={{
                     display: 'flex', 
                     alignItems: 'center', 
                     gap: '1rem', 
                     padding: '1rem', 
-                    background: checkedDocs[doc.id] ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255,255,255,0.03)', 
+                    background: checkedDocs[doc.doc_id] ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255,255,255,0.03)', 
                     borderRadius: '12px',
                     border: '1px solid',
-                    borderColor: checkedDocs[doc.id] ? 'var(--accent-primary)' : 'rgba(255,255,255,0.05)',
+                    borderColor: checkedDocs[doc.doc_id] ? 'var(--accent-primary)' : 'rgba(255,255,255,0.05)',
                     cursor: 'pointer',
                     transition: 'all 0.2s ease'
                   }}

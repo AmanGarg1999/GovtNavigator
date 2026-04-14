@@ -17,3 +17,14 @@ export const ALL_SECTORS = [
   "Tourism", "Healthcare", "Renewable Energy", 
   "Logistics", "Construction", "Fishery", "Animal Husbandry"
 ];
+
+export const GENDER_OPTIONS = ["Male", "Female", "Other", "Prefer not to say"];
+
+export const EDUCATION_LEVELS = [
+  "Below 8th", "8th Pass", "10th Pass", "12th Pass", 
+  "Graduate", "Post Graduate", "Professional Degree", "Doctorate"
+];
+
+export const SOCIAL_CATEGORIES = ["General", "OBC", "SC", "ST", "Minority"];
+
+export const ENTERPRISE_TYPES = ["Proprietorship", "Partnership", "LLP", "Private Limited", "Self Help Group (SHG)"];
