@@ -6,7 +6,10 @@ from sqlalchemy.dialects.postgresql import JSONB
 class BasicDetails(BaseModel):
     title_english: str = Field(..., description="English title of the scheme")
     title_regional: Optional[str] = Field(None, description="Regional title of the scheme")
+    category: str = Field("Welfare", description="Either 'Welfare' or 'Bureaucracy'")
     state: str = Field(..., description="State where the scheme applies. 'Central' if everywhere")
+    state_portal_url: Optional[str] = Field(None, description="Direct URL to state e-District or similar")
+    complexity_score: int = Field(1, ge=1, le=10, description="1=Simple, 10=Very Complex")
     department: str = Field(..., description="Department handling the scheme")
     scheme_tags: List[str] = Field(..., description="Array of tags like 'Subsidy', 'Loan', 'Agriculture'")
     target_personas: List[str] = Field(..., description="E.g., Entrepreneur, Farmer, Individual")
@@ -14,6 +17,8 @@ class BasicDetails(BaseModel):
 class SourceVerification(BaseModel):
     official_urls: List[str] = Field(default_factory=list, description="Array of .gov.in URLs")
     document_pdfs: List[str] = Field(default_factory=list, description="Array of PDF URLs")
+    last_verified: Optional[str] = Field(None, description="Format YYYY-MM-DD")
+    accuracy_score: int = Field(100, ge=0, le=100)
     last_updated: Optional[str] = Field(None, description="Format YYYY-MM-DD")
 
 class DemographicsCriteria(BaseModel):
@@ -75,6 +80,7 @@ class Scheme(SQLModel, table=True):
     id: Optional[int] = SQLField(default=None, primary_key=True)
     scheme_id: str = SQLField(index=True, unique=True)
     name: str = SQLField(index=True)
+    category: str = SQLField(default="Welfare", index=True)
     state: str = SQLField(index=True)
     department: str = SQLField(index=True)
     is_verified: bool = SQLField(default=False)

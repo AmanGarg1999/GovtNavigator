@@ -46,15 +46,28 @@ def ingest_scheme(scheme_data: UnifiedSchemeSchema, session: Session = Depends(g
         id=None,
         scheme_id=scheme_data.scheme_id,
         name=scheme_data.basic_details.title_english,
+        category=scheme_data.basic_details.category,
         state=scheme_data.basic_details.state,
         department=scheme_data.basic_details.department,
-        is_verified=True,  # Defaulting to true for now to show on frontend
+        is_verified=True, 
         data=scheme_data.model_dump()
     )
-    session.add(db_scheme)
+    
+    # Check if exists and update or add
+    existing = session.exec(select(Scheme).where(Scheme.scheme_id == scheme_data.scheme_id)).first()
+    if existing:
+        existing.name = db_scheme.name
+        existing.category = db_scheme.category
+        existing.state = db_scheme.state
+        existing.department = db_scheme.department
+        existing.data = db_scheme.data
+        session.add(existing)
+    else:
+        session.add(db_scheme)
+        
     session.commit()
-    session.refresh(db_scheme)
-    return db_scheme
+    session.refresh(existing or db_scheme)
+    return existing or db_scheme
 
 class ParseRequest(BaseModel):
     document_text: str

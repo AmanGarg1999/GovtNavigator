@@ -29,6 +29,11 @@ const mapBackendSchemeToFrontend = (dbScheme) => {
       contextual: data.document_dependency_graph?.contextual || [],
       instructional: data.document_dependency_graph?.instructional || []
     },
+    category: data.basic_details?.category || 'Welfare',
+    complexityScore: data.basic_details?.complexity_score || 1,
+    statePortalUrl: data.basic_details?.state_portal_url,
+    lastVerified: data.source_verification?.last_verified,
+    accuracyScore: data.source_verification?.accuracy_score || 100,
     sector: data.basic_details?.scheme_tags?.[0] || 'General',
     tags: data.basic_details?.scheme_tags || [],
     logicMessage: "Verified source data matches your profile parameters.",
@@ -186,13 +191,14 @@ function App() {
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem' }}>
                 <div>
-                  <h2 style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>
-                    {profile?.browsingOnly ? 'National Directory' : 'Optimized Benefit Match'}
+                  <h2 style={{ fontSize: '1.8rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    {profile?.browsingOnly ? 'National Directory' : `Navigator: ${profile?.state}`}
+                    {profile?.state && <span style={{ fontSize: '0.8rem', background: 'rgba(59, 130, 246, 0.1)', color: 'var(--accent-primary)', padding: '4px 12px', borderRadius: '20px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>Official State Context</span>}
                   </h2>
                   <p style={{ color: 'var(--text-secondary)' }}>
                     {profile?.browsingOnly 
-                      ? `Browsing ${results.length} live government subsidies.`
-                      : `Found ${results.filter(s => s.status === 'Eligible').length} eligible programs for you.`}
+                      ? `Browsing ${results.length} live government services across India.`
+                      : `Analyzed ${results.length} services. Found ${results.filter(s => s.status === 'Eligible' && s.category === 'Welfare').length} welfare schemes and ${results.filter(s => s.status === 'Eligible' && s.category === 'Bureaucracy').length} document guides for you.`}
                   </p>
                 </div>
                 <button onClick={() => navigate('/')} style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', fontWeight: 600, cursor: 'pointer' }}>
