@@ -3,7 +3,8 @@ import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-
 import OnboardingForm from './components/OnboardingForm';
 import SchemeList from './components/SchemeList';
 import DependencyGraph from './components/DependencyGraph';
-import { Compass, Loader2, Home, User } from 'lucide-react';
+import { Compass, Loader2, Home, User, MessageSquare } from 'lucide-react';
+import Consultant from './pages/Consultant';
 import axios from 'axios';
 import { useStorage } from './hooks/useStorage';
 
@@ -176,11 +177,24 @@ function App() {
             <Compass size={18}/> My Navigator
           </button>
         )}
+        <button 
+          onClick={() => navigate('/consultant')}
+          className="btn-secondary" 
+          style={{ 
+            width: 'auto', 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '0.5rem', 
+            padding: '0.6rem 1.2rem',
+            borderColor: location.pathname === '/consultant' ? 'var(--accent-primary)' : 'var(--card-border)',
+            color: location.pathname === '/consultant' ? 'var(--accent-primary)' : 'var(--text-secondary)'
+          }}
+        >
+          <MessageSquare size={18}/> AI Consultant
+        </button>
       </nav>
 
       <Routes>
-        <Route path="/" element={<OnboardingForm onSubmit={handleProfileSubmit} initialData={profile} />} />
-        
         <Route path="/results" element={
           loading ? (
             <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '4rem'}}>
@@ -211,6 +225,8 @@ function App() {
           )
         } />
 
+        <Route path="/schemes" element={<Navigate to="/results" replace />} />
+
         <Route path="/scheme/:id" element={
           selectedScheme ? (
             <div>
@@ -224,6 +240,8 @@ function App() {
             </div>
           ) : <Navigate to="/results" />
         } />
+
+        <Route path="/consultant" element={<Consultant />} />
       </Routes>
     </div>
   );

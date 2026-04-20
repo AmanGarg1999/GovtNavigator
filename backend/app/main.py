@@ -5,6 +5,7 @@ from app.db.session import init_db, get_session
 from app.schemas.scheme import UnifiedSchemeSchema, Scheme
 from app.services.interpreter import InterpreterAgent
 from app.services.gap_analyzer import GapAnalyzer, GapAnalysisResponse
+from app.api.v1.agent import router as agent_router
 from pydantic import BaseModel
 from typing import Dict, Any, List
 from sqlmodel import Session, select
@@ -18,6 +19,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(agent_router, prefix="/api/v1/agent", tags=["agent"])
 
 @app.on_event("startup")
 def on_startup():
